@@ -1,0 +1,326 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/google-map/google-map.html">
+<link rel="import" href="../bower_components/google-map/google-map-marker.html">
+<link rel="import" href="../bower_components/app-route/app-location.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-toolbar/paper-toolbar.html">
+<link rel="import" href="../bower_components/paper-material/paper-material.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-item/paper-item-body.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-icons/maps-icons.html">
+<link rel="import" href="../bower_components/iron-icons/av-icons.html">
+<link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../bower_components/iron-media-query/iron-media-query.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animations.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animatable.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animated-pages.html">
+<link rel="import" href="moggill-tours-icons.html">
+<link rel="import" href="moggill-tours-display.html">
+<link rel="import" href="moggill-tours-data.html">
+<link rel="import" href="../styles/shared-styles.html">
+
+<dom-module id="moggill-tours">
+
+  <template>
+  <style include="shared-styles"></style>
+  <style>
+
+  paper-material.list {
+    height: auto;
+  }
+
+  google-map {
+    margin: -16px;
+    height: 500px
+  }
+
+
+
+  </style>
+
+
+  <moggill-tours-data app-data="{{appData}}"></moggill-tours-data>
+
+  <app-location use-hash-as-path="true" route="{{route}}"></app-location>
+
+  <iron-media-query query="(min-width: 0px) and (max-width: 960px)" query-matches="{{small}}"></iron-media-query>
+  <iron-media-query query="(min-width: 961px) and (max-width: 2560px)" query-matches="{{large}}"></iron-media-query>
+
+   <paper-dialog opened modal class="welcome-dialog" id="dialog">
+    <div class="welcomeBox">
+      <h3 class="welcome">Welcome To</h3>
+      <h1><span class="moggill heading">Moggill</span><span class="tours heading">Tours</span></h1>
+    </div>
+    <br>
+    <br>
+    <div class="buttons horizontal layout" on-tap="closeDialog">
+      <a href="#/lookouts/anstead_bushland_reserve" on-tap="resetPages" class="chooseBox vertical layout center">
+        <div>
+          <div class="container">
+            <paper-fab icon="av:play-arrow"></paper-fab>
+          </div>
+          <h4>Start Tour</h4>
+        </div>
+      </a>
+      <a href="#/" dialog-dismiss class="chooseBox vertical layout center">
+        <div>
+          <div class="container">
+            <paper-fab icon="menu"></paper-fab>
+          </div>
+          <h4>Browse Points</h4>
+        </div>
+      </a>
+    </div>
+    <div class="project-listing">
+      Designed and produced by the <a href="http://www.waverleydesigncompany.com">Waverley Design Company</a> in conjunction with the Moggill Historical Society.
+    </div>
+  </paper-dialog>
+
+
+  <app-route route="{{route}}" pattern="/lookouts" tail="{{lookoutsRoute}}"   active="{{lookoutsActive}}"></app-route>
+  <app-route route="{{route}}" pattern="/" active="{{homeActive}}"></app-route>
+
+  <app-drawer-layout responsive-width="960px" force-narrow="{{homeActive}}">
+      <app-drawer id="drawer" swipe-open="true">
+        <app-header fixed condenses effects="" shadow>
+          <paper-toolbar class="main-toolbar">
+            <div class="app-name">
+              Route Navigation
+            </div>
+          </paper-toolbar>
+        </app-header>
+        <paper-menu>
+          <paper-submenu>
+            <paper-item class="menu-trigger">Route 1</paper-item>
+            <paper-menu class="menu-content" selected='{{data.lookoutName}}' attr-for-selected="name">
+              <template is="dom-repeat" items="{{appData}}" as="lookout" index-as="index">
+                <template is="dom-if" if="{{computeRoute(lookout.gsx$route.$t, '1')}}" restamp="true">
+                  <a href="#/lookouts/{{lookout.gsx$name.$t}}" tabindex="-1">
+                    <paper-item name="{{lookout.gsx$name.$t}}">{{lookout.gsx$title.$t}}</paper-item>
+                  </a>
+                </template>
+              </template>
+            </paper-menu>
+          </paper-submenu>
+        </paper-menu>
+        <paper-menu>
+          <paper-submenu>
+            <paper-item class="menu-trigger">Route 2</paper-item>
+            <paper-menu class="menu-content" selected='{{data.lookoutName}}' attr-for-selected="name">
+              <template is="dom-repeat" items="{{appData}}" as="lookout" index-as="index">
+                <template is="dom-if" if="{{computeRoute(lookout.gsx$route.$t, '2')}}" restamp="true">
+                  <a href="#/lookouts/{{lookout.gsx$name.$t}}" tabindex="-1">
+                    <paper-item name="{{lookout.gsx$name.$t}}">{{lookout.gsx$title.$t}}</paper-item>
+                  </a>
+                </template>
+              </template>
+              <paper-item disabled><i>Coming Soon</i></paper-item>
+            </paper-menu>
+          </paper-submenu>
+        </paper-menu>
+      </app-drawer>
+
+  <app-header-layout>
+    <app-header fixed condenses effects="" shadow>
+      <paper-toolbar class="main-toolbar">
+        <a href="#/"  hidden="{{!lookoutsActive}}">
+          <paper-icon-button icon="arrow-back" ></paper-icon-button>
+        </a>
+
+        <div class="app-name" on-tap="openDialog">
+          <span class="moggill">Moggill</span><span class="tours">Tours</span>
+        </div>
+
+
+      </paper-toolbar>
+    </app-header>
+
+    <div>
+      <div hidden$="{{!homeActive}}" class="home">
+
+        <paper-icon-button id="toggleViewIcon" icon="menu" on-tap="toggleView"></paper-icon-button>
+
+        <neon-animated-pages id="browsePages" selected="0" entry-animation="slide-from-right-animation" exit-animation="slide-left-animation">
+          <neon-animatable>
+            <paper-material class="list" elevation="1">
+
+              <paper-toolbar class="search-toolbar">
+                <paper-input no-label-float value="{{searchString}}" label="Search" class="search">
+                </paper-input>
+              </paper-toolbar>
+
+
+              <h1 class="route-title">Route 1</h1>
+              <template is="dom-repeat" items="{{appData}}" as="lookout" index-as="index" filter="{{computeFilter(searchString)}}">
+                <template is="dom-if" if="{{computeRoute(lookout.gsx$route.$t, '1')}}" restamp="true">
+                  <a href$="#/lookouts/{{lookout.gsx$name.$t}}" tabindex="-1" on-tap="importPage">
+                    <paper-item class="list-item">
+                      <paper-item-body>
+                        <div>{{lookout.gsx$title.$t}}</div>
+                        <div secondary>{{lookout.gsx$description.$t}}</div>
+                      </paper-item-body>
+                    </paper-item>
+                  </a>
+                </template>
+              </template>
+
+              <h1 class="route-title">Route 2</h1>
+              <template is="dom-repeat" items="{{appData}}" as="lookout" index-as="index" filter="{{computeFilter(searchString)}}">
+                <template is="dom-if" if="{{computeRoute(lookout.gsx$route.$t, '2')}}" restamp="true">
+                  <a href$="#/lookouts/{{lookout.gsx$name.$t}}" tabindex="-1">
+                    <paper-item class="list-item">
+                      <paper-item-body>
+                        <div>{{lookout.gsx$title.$t}}</div>
+                        <div secondary>{{lookout.gsx$description.$t}}</div>
+                      </paper-item-body>
+                    </paper-item>
+                  </a>
+                </template>
+              </template>
+
+            </paper-material>
+          </neon-animatable>
+          <neon-animatable>
+            <paper-material class="list" elevation="1">
+              <google-map styles="{{mapStyles}}" fit-to-markers latitude="-27.59391" longitude="152.851743" zoom="10">
+
+               <template is="dom-repeat" items="{{appData}}" as="lookout">
+                  <google-map-marker latitude="{{lookout.gsx$latitude.$t}}" longitude="{{lookout.gsx$longitude.$t}}">
+                    <a href$="#/lookouts/{{lookout.gsx$name.$t}}">Title</a>
+                  </google-map-marker>
+                 </template>
+              </google-map>
+            </paper-material>
+          </neon-animatable>
+        </neon-animated-pages>
+
+
+
+
+      </div>
+      <div hidden$="{{!lookoutsActive}}" class="detail">
+
+      <moggill-tours-display on-toggle-drawer="toggleDrawer" map-styles="{{mapStyles}}" small="{{small}}" large="{{large}}" app-data="{{appData}}" id="detail" route="{{lookoutsRoute}}"></moggill-tours-display>
+      </div>
+
+
+
+
+  </div>
+
+  </app-header-layout>
+</app-drawer-layout>
+
+
+<!-- <app-drawer-layout force-narrow="{{homeActive}}">
+  <app-drawer>
+    drawer-content
+  </app-drawer>
+  <app-header-layout>
+    <app-header>
+      <app-toolbar>
+        <div title>App name</div>
+      </app-toolbar>
+    </app-header>
+
+
+  </app-header-layout>
+</app-drawer-layout> -->
+
+
+</template>
+
+<script>
+Polymer({
+  is: 'moggill-tours',
+  ready: function() {
+    this.async(function() {
+      // If the path is blank, redirect to /
+      if (!this.route.path) {
+        this.set('route.path', '/');
+      }
+    });
+    this.$.toggleViewIcon.icon = 'maps:map';
+    this.setStyles();
+  },
+
+  importPage: function() {
+    // load page import on demand.
+    this.importHref(
+      this.resolveUrl('moggill-tours-display.html'), null, null, true);
+      console.log('imported display page');
+  },
+  toggleView: function() {
+    this.$.browsePages.selectNext();
+    if (this.$.toggleViewIcon.icon == 'maps:map') {
+      this.$.toggleViewIcon.icon = 'menu';
+    } else {
+      this.$.toggleViewIcon.icon = 'maps:map';
+    }
+  },
+  toggleDrawer: function() {
+    this.$.drawer.toggle();
+  },
+  closeDrawer: function() {
+    this.$.drawer.close();
+  },
+  openDialog: function() {
+    this.$.dialog.open();
+  },
+  closeDialog: function() {
+    this.$.dialog.close();
+  },
+  resetPages: function() {
+    this.$.detail.resetPages;
+  },
+  computeFilter: function(string) {
+    if (!string) {
+      // set filter to null to disable filtering
+      return null;
+    } else {
+      // return a filter function for the current search string
+      string = string.toLowerCase();
+      return function(article) {
+        var title = article.gsx$title.$t.toLowerCase();
+        var description = article.gsx$description.$t.toLowerCase();
+        return (title.indexOf(string) != -1 ||
+        description.indexOf(string) != -1);
+      };
+    }
+  },
+  computeRoute: function(fromRoute, matchKey) {
+    if (fromRoute == matchKey) {
+      return true;
+    } else if (fromRoute !== matchKey) {
+      return false;
+    }
+  },
+  setStyles: function() {
+    this.mapStyles = [{"featureType":"water","elementType":"geometry","stylers":[{"color":"#F1F8E9"},{"lightness":17}]},{"featureType":"landscape","elementType":"geometry","stylers":[{"color":"#ffffff"},{"lightness":20}]},{"featureType":"road.highway","elementType":"geometry.fill","stylers":[{"color":"#dedede"},{"lightness":17}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#dedede"},{"lightness":29},{"weight":0.2}]},{"featureType":"road.arterial","elementType":"geometry","stylers":[{"color":"#dedede"},{"lightness":18}]},{"featureType":"road.local","elementType":"geometry","stylers":[{"color":"#ffffff"},{"lightness":16}]},{"featureType":"poi","elementType":"geometry","stylers":[{"color":"#f1f1f1"},{"lightness":21}]},{"elementType":"labels.text.stroke","stylers":[{"visibility":"on"},{"color":"#ffffff"},{"lightness":16}]},{"elementType":"labels.text.fill","stylers":[{"saturation":36},{"color":"#333333"},{"lightness":40}]},{"elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"transit","elementType":"geometry","stylers":[{"color":"#f2f2f2"},{"lightness":19}]},{"featureType":"administrative","elementType":"geometry.fill","stylers":[{"color":"#fefefe"},{"lightness":20}]},{"featureType":"administrative","elementType":"geometry.stroke","stylers":[{"color":"#fefefe"},{"lightness":17},{"weight":1.2}]}];
+  },
+
+});
+</script>
+
+</dom-module>

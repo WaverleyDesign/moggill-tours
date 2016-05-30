@@ -1,0 +1,170 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../bower_components/paper-menu/paper-menu.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-menu/paper-submenu.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../bower_components/paper-styles/shadow.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animation.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animations.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animatable.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animated-pages.html">
+<link rel="import" href="../styles/shared-styles.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="moggill-lookout.html">
+<link rel="import" href="moggill-html.html">
+<link rel="import" href="moggill-tours-icons.html">
+
+
+<dom-module id="moggill-tours-display">
+
+  <template>
+  <style include="shared-styles"></style>
+  <style include="iron-flex iron-flex-alignment"></style>
+  <style>
+  :host {
+    display: block;
+  }
+
+  neon-animated-pages {
+    z-index: -1;
+  }
+
+
+  moggill-lookout {
+    width: 100%;
+  }
+
+
+
+  </style>
+
+  <app-route route="{{route}}" pattern="/:lookoutName" data="{{data}}"></app-route>
+
+  <app-drawer-layout responsive-width="960px">
+
+    <div>
+
+
+      <neon-animated-pages id='animatedPages'
+      selected='{{selectedPage}}'
+      entry-animation='{{entryAnimation}}'
+      exit-animation='{{exitAnimation}}'
+      attr-for-selected="name">
+
+      <template is="dom-repeat" items="{{appData}}" as="lookout">
+        <neon-animatable name="{{lookout.gsx$name.$t}}" class="vertical layout center">
+          <moggill-lookout
+
+          name="{{lookout.gsx$name.$t}}"
+          title="{{lookout.gsx$title.$t}}"
+          description="{{lookout.gsx$description.$t}}"
+          images="{{lookout.gsx$images.$t}}"
+          latitude="{{lookout.gsx$latitude.$t}}"
+          longitude="{{lookout.gsx$longitude.$t}}"
+          video="{{lookout.gsx$video.$t}}"
+          audio="{{lookout.gsx$audio.$t}}"
+          map-styles="{{mapStyles}}"
+          ></moggill-lookout>
+        </neon-animatable>
+      </template>
+
+    </neon-animated-pages>
+
+  </div>
+
+  <div class="" hidden$="{{large}}">
+    <paper-material  elevation="1" class="bottom-sheet horizontal layout around-justified">
+      <paper-icon-button on-tap="selectPrev" icon="moggill-tours-icons:chevron-left"></paper-icon-button>
+      <paper-icon-button icon="moggill-tours-icons:menu" on-tap="toggleDrawer"></paper-icon-button>
+      <paper-icon-button on-tap="selectNext" icon="moggill-tours-icons:chevron-right"></paper-icon-button>
+    </paper-material>
+  </div>
+
+</app-drawer-layout>
+</template>
+
+<script>
+
+Polymer({
+
+  is: 'moggill-tours-display',
+
+  properties: {
+    route: {
+      type: Object,
+      notify: true
+    },
+  },
+
+  observers: [
+    'pageChanged(data.lookoutName)'
+  ],
+  ready: function() {
+    this.resetPages;
+  },
+  resetPages: function() {
+    this.selectedPage = 'anstead_bushland_reserve';
+  },
+  pageChanged: function() {
+    // We assign to selectedPage here rather than just binding
+    // the selected property of neon-animated-pages to selectedPage
+    // so that we can first figure out which animation to use in the
+    // transition.
+    var transitioningFrom = this.$.animatedPages.selected;
+    var transitioningTo = this.data.lookoutName;
+    var pagesInOrder = this.$.animatedPages.items.map(
+      function(x) {return x.getAttribute('name')});
+      if (pagesInOrder.indexOf(transitioningFrom) > pagesInOrder.indexOf(transitioningTo)) {
+        this.entryAnimation = 'slide-from-left-animation';
+        this.exitAnimation = 'slide-right-animation';
+      } else {
+        this.entryAnimation = 'slide-from-right-animation';
+        this.exitAnimation = 'slide-left-animation';
+      }
+
+      this.selectedPage = this.data.lookoutName;
+      // slide-from-left-animation
+    },
+    selectNext: function() {
+      this.entryAnimation = 'slide-from-right-animation';
+      this.exitAnimation = 'slide-left-animation';
+      this.$.animatedPages.selectNext();
+    },
+    selectPrev: function() {
+      this.entryAnimation = 'slide-from-left-animation';
+      this.exitAnimation = 'slide-right-animation';
+      this.$.animatedPages.selectPrevious();
+    },
+    toggleDrawer: function() {
+      // this.$.drawer.toggle();
+      this.fire('toggle-drawer');
+    },
+
+    computeRoute: function(fromRoute, matchKey) {
+      if (fromRoute == matchKey) {
+        return true;
+      } else if (fromRoute !== matchKey) {
+        return false;
+      }
+    },
+
+  });
+
+  </script>
+
+</dom-module>

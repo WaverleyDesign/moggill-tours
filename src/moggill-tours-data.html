@@ -1,0 +1,38 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
+<link rel="import" href="../bower_components/google-sheets/google-sheets.html">
+
+
+<dom-module id="moggill-tours-data">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+
+    <google-sheets id="sheet" key="11t6whJ1d4hWKZEIMTP4P7oxbYd5JQhm0nj-NexppGvI"
+      tab-id="1" published rows="{{appData}}">
+    </google-sheets>
+
+    <!-- <app-indexeddb-mirror
+      key="NexppGvI"
+      data="{{_rows}}"
+      persisted-data="{{appData}}"
+      worker-url="app-indexeddb-mirror-worker.js"
+      >
+    </app-indexeddb-mirror> -->
+
+  </template>
+  <script>
+    Polymer({
+      is: 'moggill-tours-data',
+      properties: {
+        appData: {
+          type: Object,
+          notify: true
+        }
+      },
+    });
+  </script>
+</dom-module>

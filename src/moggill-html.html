@@ -1,0 +1,51 @@
+
+<dom-module id="moggill-html">
+  <template>
+    <style>
+    :host {
+      display: block;
+      width: 100%;
+    }
+
+    img {
+      height: 300px;
+    }
+
+    </style>
+    <style include="shared-styles"></style>
+    <style include="iron-flex iron-flex-alignment"></style>
+
+
+
+    <h2 hidden="{{!title}}" class="card-title">{{title}}</h2>
+    <div id="container">
+
+    </div>
+
+
+
+
+
+
+  </template>
+  <script>
+    Polymer({
+      is: 'moggill-html',
+      properties: {
+        html: {
+          type: String,
+        },
+      },
+      ready: function() {
+        var domBind = document.createElement('template', 'dom-bind');
+        domBind.greeting = this.html;
+        var doc = domBind.content.ownerDocument;
+        var elem = doc.createElement('div');
+        elem.innerHTML = this.html;
+        domBind.content.appendChild(elem);
+        this.$.container.appendChild(domBind);
+      },
+
+    });
+  </script>
+</dom-module>

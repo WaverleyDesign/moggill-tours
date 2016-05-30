@@ -1,0 +1,94 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/google-map/google-map.html">
+<link rel="import" href="../bower_components/google-youtube/google-youtube.html">
+<link rel="import" href="../bower_components/paper-material/paper-material.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../styles/shared-styles.html">
+
+<dom-module id="moggill-lookout">
+  <template>
+    <style include="shared-styles"></style>
+    <style>
+      google-map {
+        height: 500px
+      }
+
+      paper-button {
+        position: absolute;
+        bottom: 36px;
+        right: 46px;
+        z-index: 2;
+        background-color: #33691E;
+        color: #FAFAFA;
+      }
+
+      .coming-soon {
+        margin-bottom: 48px;
+      }
+
+    </style>
+
+<paper-material elevation="1" class="lookout-page list">
+  <h1>{{title}}</h1>
+  <p>
+    {{description}}
+  </p>
+</paper-material>
+
+<template is="dom-if" if="{{images}}" restamp="true">
+  <paper-material elevation="1" class="list lookout-page">
+    <moggill-html html="{{images}}" title="Images"></moggill-html>
+  </paper-material>
+</template>
+
+<template is="dom-if" if="{{latitude}}" restamp="true">
+  <paper-material elevation="1" class="lookout-page list">
+    <google-map styles="{{mapStyles}}" class="lookout-map" map-type="{{buttonText}}" api-key="AIzaSyAQyaK77fQyFj5RcfJVbKGptWJa52f5VFk" fit-to-markers disable-default-ui>
+      <google-map-marker latitude="{{latitude}}" longitude="{{longitude}}"></google-map-marker>
+    </google-map>
+    <paper-button raised on-tap="switchView">{{buttonText}}</paper-button>
+  </paper-material>
+</template>
+
+<template is="dom-if" if="{{video}}" restamp="true">
+  <paper-material elevation="1" class="list lookout-page">
+    <google-youtube
+      width="100%"
+      height="500px"
+      class="lookout-video"
+      video-id="{{video}}"
+    ></google-youtube>
+  </paper-material>
+</template>
+
+<paper-material hidden$="{{completed}}" class="lookout-page list coming-soon" elevation="1">
+  <div class="vertical layout center">
+    <h1><i>More Information Coming Soon</i></h1>
+  </div>
+</paper-material>
+
+<br />
+
+
+
+  </template>
+  <script>
+    Polymer({
+      is: 'moggill-lookout',
+      properties: {
+        buttonText: {
+          type: String,
+          value: 'roadmap'
+        },
+      },
+      switchView: function() {
+        if (this.buttonText == 'satellite') {
+          this.buttonText = 'roadmap';
+        } else if (this.buttonText == 'roadmap') {
+          this.buttonText = 'satellite';
+        }
+      },
+
+    });
+  </script>
+</dom-module>
